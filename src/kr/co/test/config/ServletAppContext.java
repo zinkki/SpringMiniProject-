@@ -25,10 +25,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import kr.co.test.beans.UserBean;
 import kr.co.test.interceptor.CheckLoginInterceptor;
+import kr.co.test.interceptor.CheckWriterInterceptor;
 import kr.co.test.interceptor.TopMenuInterceptor;
 import kr.co.test.mapper.BoardMapper;
 import kr.co.test.mapper.TopMenuMapper;
 import kr.co.test.mapper.UserMapper;
+import kr.co.test.service.BoardService;
 import kr.co.test.service.TopMenuService;
 
 // Spring MVC 프로젝트에 관련된 설정을 하는 클래스
@@ -61,6 +63,9 @@ public class ServletAppContext implements WebMvcConfigurer{
 	
 	@Resource(name="loginUserBean")
 	private UserBean loginUserBean;
+	
+	@Autowired
+	private BoardService boardService;
 	
 	//Controller의 메서드가 반환하는 jsp의 이름앞뒤에 경로와 확장자를 붙여주도록 설정!
 	@Override
@@ -126,6 +131,11 @@ public class ServletAppContext implements WebMvcConfigurer{
 		InterceptorRegistration reg2 = registry.addInterceptor(checkLoginInterceptor);
 		reg2.addPathPatterns("/user/modify", "/user/logout", "/board/*");
 		reg2.excludePathPatterns("/board/main");
+		
+		CheckWriterInterceptor checkWriterInterceptor = new CheckWriterInterceptor(loginUserBean, boardService);
+		InterceptorRegistration reg3 = registry.addInterceptor(checkWriterInterceptor);
+		reg3.addPathPatterns("/board/modify","/board/delete");
+		
 	}
 	//혹시 에러날까봐 걍 해봄..원래 properties의 error메세지랑 db랑 같이쓰면 500에러난대..이거쓰면안난다네..근데 난 원래안나지만 걍 써봄
 	//ㅁㅊ 걍 저거 주석처리한게 안되는거였음 ㅁㅊㅁㅊ MessageSource로 해야되는거여썽 낡은윤재성씨...
